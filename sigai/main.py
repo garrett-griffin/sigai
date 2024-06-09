@@ -26,6 +26,15 @@ def fetch_files_from_github(repo_url, verbose=False):
 
     return files
 
+def get_return_annotation(node):
+    if isinstance(node, ast.Name):
+        return node.id
+    elif isinstance(node, ast.Attribute):
+        return '.'.join([node.value.id, node.attr])
+    elif isinstance(node, ast.Subscript):
+        return get_return_annotation(node.value)
+    return "None"
+
 def parse_file(file_content):
     tree = ast.parse(file_content)
     summary = []
@@ -33,14 +42,14 @@ def parse_file(file_content):
     for node in tree.body:
         if isinstance(node, ast.FunctionDef):
             args = [arg.arg for arg in node.args.args]
-            returns = node.returns.id if node.returns else "None"
+            returns = get_return_annotation(node.returns) if node.returns else "None"
             summary.append(f"{node.name}({', '.join(args)}) -> {returns}")
         elif isinstance(node, ast.ClassDef):
             class_summary = [f"{node.name}"]
             for item in node.body:
                 if isinstance(item, ast.FunctionDef):
                     args = [arg.arg for arg in item.args.args]
-                    returns = item.returns.id if item.returns else "None"
+                    returns = get_return_annotation(item.returns) if item.returns else "None"
                     class_summary.append(f"  {item.name}({', '.join(args)}) -> {returns}")
             summary.append("\n".join(class_summary))
 
