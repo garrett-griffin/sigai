@@ -3,8 +3,9 @@
 import requests
 from github import Github
 import ast
+import sys
+import argparse
 
-# Function to fetch files from a GitHub repository
 def fetch_files_from_github(repo_url):
     repo_name = repo_url.rstrip('/').split('/')[-1]
     user_name = repo_url.rstrip('/').split('/')[-2]
@@ -22,7 +23,6 @@ def fetch_files_from_github(repo_url):
 
     return files
 
-# Function to parse Python files and extract function signatures
 def parse_file(file_content):
     tree = ast.parse(file_content)
     summary = []
@@ -43,7 +43,6 @@ def parse_file(file_content):
 
     return summary
 
-# Function to generate the summary for a GitHub repository
 def generate_summary(repo_url):
     files = fetch_files_from_github(repo_url)
     summary = []
@@ -55,10 +54,17 @@ def generate_summary(repo_url):
 
     return "\n\n".join(summary)
 
-# Example usage
-if __name__ == "__main__":
-    repo_url = "https://github.com/your_username/your_repository"
-    summary = generate_summary(repo_url)
-    with open("summary.txt", "w") as f:
+def main():
+    parser = argparse.ArgumentParser(description="Generate a summary of function signatures and class methods from a given GitHub repository.")
+    parser.add_argument("repo_url", help="The URL of the GitHub repository")
+    parser.add_argument("--output", help="The output file to save the summary", default="summary.txt")
+
+    args = parser.parse_args()
+
+    summary = generate_summary(args.repo_url)
+    with open(args.output, "w") as f:
         f.write(summary)
-    print("Summary generated and saved to summary.txt")
+    print(f"Summary generated and saved to {args.output}")
+
+if __name__ == "__main__":
+    main()
