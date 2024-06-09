@@ -19,7 +19,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8'  # Adjust if you need a different version
+        python-version: '3.11'  # Set the correct Python version
 
     - name: Install Poetry
       run: curl -sSL https://install.python-poetry.org | python3 -

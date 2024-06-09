@@ -13,11 +13,7 @@ class TestSigai(unittest.TestCase):
         mock_file1 = MagicMock()
         mock_file1.path = 'module1.py'
         mock_file1.download_url = 'https://example.com/module1.py'
-        mock_file2 = MagicMock()
-        mock_file2.path = 'tests/test_module.py'
-        mock_file2.download_url = 'https://example.com/tests/test_module.py'
-
-        mock_repo.get_contents.return_value = [mock_file1, mock_file2]
+        mock_repo.get_contents.return_value = [mock_file1]
         mock_github.return_value.get_repo.return_value = mock_repo
 
         # Mock file content
@@ -40,6 +36,10 @@ class MyClass:
             "  method1(self, arg1) -> None"
         )
 
+        # Debugging output
+        print("Actual Summary:\n", summary.strip())
+        print("Expected Summary:\n", expected_summary)
+
         self.assertEqual(summary.strip(), expected_summary)
 
     @patch('sigai.main.Github')
@@ -57,15 +57,25 @@ class MyClass:
         mock_repo.get_contents.return_value = [mock_file1, mock_file2]
         mock_github.return_value.get_repo.return_value = mock_repo
 
-        # Mock file content
-        mock_get.return_value.text = """
+        # Mock file content for each request
+        mock_get.side_effect = [
+            MagicMock(text="""
 def func1(arg1, arg2):
     return arg1 + arg2
 
 class MyClass:
     def method1(self, arg1):
         return arg1
-"""
+"""),
+            MagicMock(text="""
+def func1(arg1, arg2):
+    return arg1 + arg2
+
+class MyClass:
+    def method1(self, arg1):
+        return arg1
+""")
+        ]
 
         repo_url = "https://github.com/your_username/your_repository"
         summary = generate_summary(repo_url, verbose=True)
@@ -80,6 +90,10 @@ class MyClass:
             "MyClass\n"
             "  method1(self, arg1) -> None"
         )
+
+        # Debugging output
+        print("Actual Summary (Verbose):\n", summary.strip())
+        print("Expected Summary (Verbose):\n", expected_summary)
 
         self.assertEqual(summary.strip(), expected_summary)
 

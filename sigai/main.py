@@ -30,7 +30,7 @@ def parse_file(file_content):
     tree = ast.parse(file_content)
     summary = []
 
-    for node in ast.walk(tree):
+    for node in tree.body:
         if isinstance(node, ast.FunctionDef):
             args = [arg.arg for arg in node.args.args]
             returns = node.returns.id if node.returns else "None"
